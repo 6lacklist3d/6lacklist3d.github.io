@@ -292,6 +292,10 @@ section.entered{animation:secGlitch .5s ease forwards;}
 .ct-ta{width:100%;background:transparent;border:1px solid rgba(0,255,159,.18);color:var(--green);font-family:var(--fm);font-size:.73rem;padding:.5rem;outline:none;resize:vertical;min-height:80px;}
 .ct-ta::placeholder{color:rgba(0,255,159,.22);}
 .ct-ta:focus{border-color:var(--green);}
+.ct-input.invalid,.ct-sel.invalid{border-bottom-color:var(--pink)!important;}
+.ct-ta.invalid{border-color:var(--pink)!important;}
+#val-msg{font-family:var(--fm);font-size:.65rem;color:var(--pink);display:none;margin-bottom:.6rem;letter-spacing:.06em;}
+
 .btn-send{font-family:var(--fm);font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;padding:.8rem 1.8rem;background:var(--green);color:#000;border:none;cursor:pointer;font-weight:700;transition:all .2s;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);margin-top:.8rem;}
 .btn-send:hover{background:#fff;}
 #fmsg{font-family:var(--fm);font-size:.65rem;color:var(--green);display:none;margin-top:.5rem;}
@@ -627,7 +631,7 @@ footer{padding:2rem 5rem;border-top:1px solid var(--b1);background:var(--bg);dis
             </select>
           </div>
           <div class="ct-ta-wrap"><div class="ct-ta-label">[04] brief &gt;</div><textarea class="ct-ta" placeholder="target, environment, objectives..."></textarea></div>
-          <button class="btn-send" onclick="handleSend(event)">TRANSMIT →</button>
+          <p id="val-msg"></p><button class="btn-send" onclick="handleSend(event)">TRANSMIT →</button>
           <p id="fmsg"></p>
         </div>
       </div>
@@ -738,9 +742,29 @@ if(htBody){
 async function handleSend(e){
   e.preventDefault();
   const m=document.getElementById('fmsg');
+  const vm=document.getElementById('val-msg');
   const btn=document.querySelector('.btn-send');
   const fields=document.querySelectorAll('.ct-input,.ct-sel,.ct-ta');
-  const data={name:fields[0].value,email:fields[1].value,scope:fields[2].value,brief:fields[3].value};
+  const [nameF,emailF,scopeF,briefF]=[...fields];
+
+  // Clear previous errors
+  fields.forEach(f=>f.classList.remove('invalid'));
+  vm.style.display='none';
+
+  // Validate
+  const errors=[];
+  if(!nameF.value.trim()){nameF.classList.add('invalid');errors.push('[01] identify');}
+  if(!emailF.value.trim()||!/^[^@]+@[^@]+\.[^@]+$/.test(emailF.value)){emailF.classList.add('invalid');errors.push('[02] contact');}
+  if(!scopeF.value){scopeF.classList.add('invalid');errors.push('[03] scope');}
+  if(!briefF.value.trim()||briefF.value.trim().length<10){briefF.classList.add('invalid');errors.push('[04] brief');}
+
+  if(errors.length){
+    vm.textContent='// required fields missing: '+errors.join(', ');
+    vm.style.display='block';
+    return;
+  }
+
+  const data={name:nameF.value.trim(),email:emailF.value.trim(),scope:scopeF.value,brief:briefF.value.trim()};
   btn.textContent='TRANSMITTING...';btn.style.background='var(--muted)';btn.disabled=true;
   try{
     const res=await fetch('https://formspree.io/f/mbdqzdkv',{
