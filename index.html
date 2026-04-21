@@ -639,7 +639,7 @@ footer{padding:2rem 5rem;border-top:1px solid var(--b1);background:var(--bg);dis
   <a href="#hero" class="flogo">[AN]</a>
   <span class="fcopy">© 2025 Abdullah Nwir — Dalarna, Sweden</span>
   <div class="flinks">
-    <a href="https://www.linkedin.com/in/abdullah-n-188274225/" target="_blank">LinkedIn</a>
+    <a href="https://www.linkedin.com/in/abdullahnwir" target="_blank">LinkedIn</a>
     <a href="mailto:rubber.holly9276@eagereverest.com">Email</a>
   </div>
 </footer>
@@ -694,40 +694,36 @@ const CORRUPT='4BDU||4H@#$%▓█▒░!?><\\|/01';
 function nameGlitch(){const seq=[()=>{const c=nOrig.split('').map(ch=>Math.random()>.45?CORRUPT[Math.floor(Math.random()*CORRUPT.length)]:ch).join('');gEl.textContent=c;gEl.setAttribute('data-text',c);},()=>{gEl.style.opacity='0';gEl.style.transform='translateX(-8px) scaleY(0.08)';},()=>{gEl.style.opacity='1';gEl.style.transform='translateX(6px)';const c=nOrig.split('').map(ch=>Math.random()>.3?CORRUPT[Math.floor(Math.random()*CORRUPT.length)]:ch).join('');gEl.textContent=c;gEl.setAttribute('data-text',c);},()=>{gEl.style.opacity='0';gEl.style.transform='translateX(4px) scaleY(0.05)';},()=>{gEl.style.opacity='1';gEl.style.transform='none';gEl.textContent=nOrig;gEl.setAttribute('data-text',nOrig);setTimeout(nameGlitch,3000+Math.random()*3500);}];let i=0;const delays=[0,70,90,80,90];function run(){seq[i]();i++;if(i<seq.length)setTimeout(run,delays[i]||80);}run();}
 setTimeout(nameGlitch,1800);
 
-// TITLE SCRAMBLE
+// TITLE SCRAMBLE — fires once only, always restores from data-scramble attribute
 const SC='▓█▒░@#$%&!?<>/\\|ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-function scrambleTitle(el){const origHTML=el.innerHTML;const origText=el.textContent;let step=0,total=28;const iv=setInterval(()=>{el.textContent=origText.split('').map((c,i)=>/\s/.test(c)?c:i<(step/total)*origText.length?c:SC[Math.floor(Math.random()*SC.length)]).join('');if(++step>total){el.innerHTML=origHTML;clearInterval(iv);}},44);}
+const _scrambled=new WeakSet();
+function scrambleTitle(el){
+  if(_scrambled.has(el))return;
+  _scrambled.add(el);
+  const origHTML=el.innerHTML;
+  const origText=el.getAttribute('data-scramble')||el.textContent;
+  let step=0,total=30;
+  const iv=setInterval(()=>{
+    el.textContent=origText.split('').map((c,i)=>{
+      if(/\s/.test(c))return c;
+      return i<(step/total)*origText.length?c:SC[Math.floor(Math.random()*SC.length)];
+    }).join('');
+    if(++step>total){el.innerHTML=origHTML;clearInterval(iv);}
+  },42);
+}
 
-// SECTION ENTRY GLITCH
-const secObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting&&e.target.tagName==='SECTION'&&e.target.id!=='hero'){e.target.classList.add('entered');setTimeout(()=>e.target.classList.remove('entered'),600);secObs.unobserve(e.target);}});},{threshold:.07});
-document.querySelectorAll('section:not(#hero)').forEach(s=>secObs.observe(s));
-
-// ARSENAL STAGGER
-document.querySelectorAll('.agrid').forEach(grid=>{const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.ac').forEach((c,i)=>setTimeout(()=>c.classList.add('on'),i*38));obs.unobserve(e.target);}});},{threshold:.04});obs.observe(grid);});
-
-// SERVICES CARD STAGGER
-const scObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.svc-card').forEach((c,i)=>setTimeout(()=>c.classList.add('on'),i*90));scObs.unobserve(e.target);}});},{threshold:.04});
-const sc=document.querySelector('.svc-cards');if(sc)scObs.observe(sc);
-
-// ABOUT MODULES STAGGER
-const modObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.amod').forEach((m,i)=>setTimeout(()=>m.classList.add('on'),i*120));modObs.unobserve(e.target);}});},{threshold:.04});
-const ms=document.querySelector('.amod-stack');if(ms)modObs.observe(ms);
-
-// TERM FLICKER
-const termObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>{e.target.classList.add('on');setTimeout(()=>e.target.classList.add('flicker'),60);setTimeout(()=>e.target.classList.remove('flicker'),1700);},200);termObs.unobserve(e.target);}});},{threshold:.1});
-document.querySelectorAll('.term').forEach(t=>termObs.observe(t));
-
-// CTF COUNTER
-let scored=false;
-const ctfObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting&&!scored){scored=true;let v=0;const target=3484;const iv=setInterval(()=>{v=Math.min(v+Math.ceil(target/80),target);document.getElementById('scoreCounter').textContent=v.toLocaleString();if(v>=target)clearInterval(iv);},18);ctfObs.unobserve(e.target);}});},{threshold:.3});
-const ctfEl=document.getElementById('ctf');if(ctfEl)ctfObs.observe(ctfEl);
-
-// DOSSIER BARS
-const dosObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.dtb-fill').forEach(f=>f.classList.add('on'));dosObs.unobserve(e.target);}});},{threshold:.15});
-const dosEl=document.getElementById('dossier');if(dosEl)dosObs.observe(dosEl);
-
-// GENERIC REVEAL + SCRAMBLE
-const rvObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');if(e.target.classList.contains('sec-title')&&e.target.hasAttribute('data-scramble'))setTimeout(()=>scrambleTitle(e.target),150);}});},{threshold:.1});
+// GENERIC REVEAL + SCRAMBLE — unobserve immediately, fires once only
+const rvObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('on');
+      if(e.target.classList.contains('sec-title')&&e.target.hasAttribute('data-scramble')){
+        setTimeout(()=>scrambleTitle(e.target),150);
+      }
+      rvObs.unobserve(e.target);
+    }
+  });
+},{threshold:0});
 document.querySelectorAll('.rv').forEach(r=>rvObs.observe(r));
 
 // HERO TERMINAL
@@ -739,7 +735,73 @@ if(htBody){
   setTimeout(runSession,1200);
 }
 
-function handleSend(e){e.preventDefault();const m=document.getElementById('fmsg');m.textContent='// transmission received. response within 48h.';m.style.display='block';}
+async function handleSend(e){
+  e.preventDefault();
+  const m=document.getElementById('fmsg');
+  const btn=document.querySelector('.btn-send');
+  const fields=document.querySelectorAll('.ct-input,.ct-sel,.ct-ta');
+  const data={name:fields[0].value,email:fields[1].value,scope:fields[2].value,brief:fields[3].value};
+  btn.textContent='TRANSMITTING...';btn.style.background='var(--muted)';btn.disabled=true;
+  try{
+    const res=await fetch('https://formspree.io/f/mbdqzdkv',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(data)
+    });
+    if(res.ok){
+      btn.textContent='TRANSMITTED ✓';btn.style.background='var(--green)';
+      m.style.color='var(--green)';
+      m.textContent='// transmission received. response within 48h.';
+      m.style.display='block';
+      fields.forEach(f=>f.value='');
+    } else {throw new Error();}
+  } catch(err){
+    btn.textContent='TRANSMIT →';btn.style.background='var(--green)';btn.disabled=false;
+    m.style.color='var(--pink)';
+    m.textContent='// transmission failed. email: rubber.holly9276@eagereverest.com';
+    m.style.display='block';
+  }
+}
+
+
+// SECTION ENTRY GLITCH
+const secObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting&&e.target.tagName==='SECTION'&&e.target.id!=='hero'){e.target.classList.add('entered');setTimeout(()=>e.target.classList.remove('entered'),600);secObs.unobserve(e.target);}});},{threshold:0});
+document.querySelectorAll('section:not(#hero)').forEach(s=>secObs.observe(s));
+
+// ARSENAL STAGGER
+document.querySelectorAll('.agrid').forEach(grid=>{
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.ac').forEach((c,i)=>setTimeout(()=>c.classList.add('on'),i*38));obs.unobserve(e.target);}});},{threshold:0});
+  obs.observe(grid);
+});
+
+// SERVICES CARD STAGGER
+const scObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.svc-card').forEach((c,i)=>setTimeout(()=>c.classList.add('on'),i*90));scObs.unobserve(e.target);}});},{threshold:0});
+const sc=document.querySelector('.svc-cards');if(sc)scObs.observe(sc);
+
+// ABOUT MODULES STAGGER
+const modObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.amod').forEach((m,i)=>setTimeout(()=>m.classList.add('on'),i*120));modObs.unobserve(e.target);}});},{threshold:0});
+const ms=document.querySelector('.amod-stack');if(ms)modObs.observe(ms);
+
+// TERM FLICKER
+const termObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>{e.target.classList.add('on');setTimeout(()=>e.target.classList.add('flicker'),60);setTimeout(()=>e.target.classList.remove('flicker'),1700);},200);termObs.unobserve(e.target);}});},{threshold:0});
+document.querySelectorAll('.term').forEach(t=>termObs.observe(t));
+
+// CTF COUNTER
+let scored=false;
+const ctfObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting&&!scored){scored=true;let v=0;const target=3484;const iv=setInterval(()=>{v=Math.min(v+Math.ceil(target/80),target);document.getElementById('scoreCounter').textContent=v.toLocaleString();if(v>=target)clearInterval(iv);},18);ctfObs.unobserve(e.target);}});},{threshold:.2});
+const ctfEl=document.getElementById('ctf');if(ctfEl)ctfObs.observe(ctfEl);
+
+// DOSSIER BARS
+const dosObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.dtb-fill').forEach(f=>f.classList.add('on'));dosObs.unobserve(e.target);}});},{threshold:.1});
+const dosEl=document.getElementById('dossier');if(dosEl)dosObs.observe(dosEl);
+// FALLBACK — if observers don't fire (e.g. page loads pre-scrolled), reveal everything after 2s
+setTimeout(()=>{
+  document.querySelectorAll('.rv:not(.on)').forEach(el=>el.classList.add('on'));
+  document.querySelectorAll('.ac:not(.on)').forEach((el,i)=>setTimeout(()=>el.classList.add('on'),i*20));
+  document.querySelectorAll('.svc-card:not(.on)').forEach((el,i)=>setTimeout(()=>el.classList.add('on'),i*60));
+  document.querySelectorAll('.amod:not(.on)').forEach((el,i)=>setTimeout(()=>el.classList.add('on'),i*80));
+  document.querySelectorAll('.term:not(.on)').forEach(el=>el.classList.add('on'));
+},2000);
 </script>
 </body>
 </html>
